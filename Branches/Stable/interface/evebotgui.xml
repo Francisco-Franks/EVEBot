@@ -2234,6 +2234,32 @@
 								</Textentry>
 							</Children>
 						</Frame>
+						<Frame name='frmGeneralOptions2'>
+							<X>10</X>
+							<Y>240</Y>
+							<Height>40</Height>
+							<Width>480</Width>
+							<Border>2</Border>
+							<Children>
+								<checkbox name='cbRunStoryline'>
+									<X>10</X>
+									<Y>10</Y>
+									<Height>20</Height>
+									<Width>50</Width>
+									<Text>Run Storyline</Text>
+									<AutoTooltip>If checked, run Storyline missions.</AutoTooltip>
+									<OnLoad>
+										if ${Script[EVEBot].VariableScope.Config.Missioneer.RunStorylineMissions}
+										{
+										This:SetChecked
+										}
+									</OnLoad>
+									<OnLeftClick>
+										Script[EVEBot].VariableScope.Config.Missioneer:SetRunStorylineMissions[${This.Checked}]
+									</OnLeftClick>
+								</checkbox>
+							</Children>
+						</Frame>
 					</Tab>
 
 					<Tab name='Hauler'>
