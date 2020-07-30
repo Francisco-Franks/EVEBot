@@ -837,10 +837,10 @@ objectdef obj_Agents
 
 		variable float volume = 0
 
-		right:Set[${details.Escape.Find["m³"]}]
+		right:Set[${details.Escape.Find["m%C2%B3"]}]
 		if ${right} > 0
 		{
-			;Logger:Log["obj_Agents: DEBUG: Found \"m³\" at ${right}."]
+			;Logger:Log["obj_Agents: DEBUG: Found \"m%C2%B3\" at ${right}."]
 			right:Dec
 			left:Set[${details.Escape.Mid[${Math.Calc[${right}-16]},16].Find[" ("]}]
 			if ${left} > 0
@@ -855,12 +855,12 @@ objectdef obj_Agents
 			}
 			else
 			{
-				Logger:Log["obj_Agents: ERROR: Did not find number before \"m³\"!"]
+				Logger:Log["obj_Agents: ERROR: Did not find number before \"m%C2%B3\"!"]
 			}
 		}
 		else
 		{
-			Logger:Log["obj_Agents: DEBUG: Did not find \"m³\".  No cargo???"]
+			Logger:Log["obj_Agents: DEBUG: Did not find \"m%C2%B3\".  No cargo???"]
 		}
 
 		Missions.MissionCache:SetVolume[${amIterator.Value.AgentID},${volume}]
@@ -1096,10 +1096,10 @@ objectdef obj_Agents
 
 		variable float volume = 0
 
-		right:Set[${details.Escape.Find["m³"]}]
+		right:Set[${details.Escape.Find["m%C2%B3"]}]
 		if ${right} > 0
 		{
-			;Logger:Log["obj_Agents: DEBUG: Found \"m³\" at ${right}."]
+			;Logger:Log["obj_Agents: DEBUG: Found \"m%C2%B3\" at ${right}."]
 			right:Dec
 			left:Set[${details.Escape.Mid[${Math.Calc[${right}-16]},16].Find[" ("]}]
 			if ${left} > 0
@@ -1114,12 +1114,12 @@ objectdef obj_Agents
 			}
 			else
 			{
-				Logger:Log["obj_Agents: ERROR: Did not find number before \"m³\"!"]
+				Logger:Log["obj_Agents: ERROR: Did not find number before \"m%C2%B3\"!"]
 			}
 		}
 		else
 		{
-			Logger:Log["obj_Agents: DEBUG: Did not find \"m³\".  No cargo???"]
+			Logger:Log["obj_Agents: DEBUG: Did not find \"m%C2%B3\".  No cargo???"]
 		}
 
 		Missions.MissionCache:SetVolume[${amIterator.Value.AgentID},${volume}]
