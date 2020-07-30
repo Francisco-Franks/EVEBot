@@ -175,6 +175,7 @@ objectdef obj_Agents
 	variable int RetryCount = 0
 	variable obj_AgentList AgentList
 	variable obj_MissionBlacklist MissionBlacklist
+	variable bool IsStoryline						  
 
     method Initialize()
     {
@@ -316,6 +317,16 @@ objectdef obj_Agents
 				Logger:Log["obj_Agents: DEBUG: amIterator.Value.AgentID = ${amIterator.Value.AgentID}"]
 				Logger:Log["obj_Agents: DEBUG: amIterator.Value.State = ${amIterator.Value.State}"]
 				Logger:Log["obj_Agents: DEBUG: amIterator.Value.Type = ${amIterator.Value.Type}"]
+				if ${amIterator.Value.Type.Find[Storyline](exists)}
+				{
+					IsStoryline:Set[TRUE]
+					Logger:Log["Storyline ${IsStoryline}"]
+				}
+				else
+				{
+					IsStoryline:Set[FALSE]
+					Logger:Log["Storyline ${IsStoryline}"]
+				}													   
 				if ${amIterator.Value.State} == 1
 				{
 					if ${MissionBlacklist.IsBlacklisted[${EVE.Agent[id,${amIterator.Value.AgentID}].Level},"${amIterator.Value.Name}"]} == FALSE
@@ -326,25 +337,25 @@ objectdef obj_Agents
 						avoidLowSec:Set[${Config.Missioneer.AvoidLowSec}]
 						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE)
 						{
-							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE && !${IsStoryline}
 							{
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
 								return
 							}
 
-							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE && !${IsStoryline}
 							{
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
 								return
 							}
 
-							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE && !${IsStoryline}
 							{
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
 								return
 							}
 
-							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE && !${IsStoryline}
 							{
 								Logger:Log["Setting ActiveAgent to ${EVE.Agent[id,${amIterator.Value.AgentID}].Name}", LOG_DEBUG]
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
@@ -482,6 +493,16 @@ objectdef obj_Agents
 		{
 			do
 			{
+				if ${amIterator.Value.Type.Find[Storyline](exists)}
+				{
+					IsStoryline:Set[TRUE]
+					UI:UpdateConsole["${Storyline IsStoryline}"]
+				}
+				else
+				{
+					IsStoryline:Set[FALSE]
+					UI:UpdateConsole["${Storyline IsStoryline}"]
+				}													   
 				if ${amIterator.Value.State} > 1
 				{
 					if ${MissionBlacklist.IsBlacklisted[${EVE.Agent[id,${amIterator.Value.AgentID}].Level},"${amIterator.Value.Name}"]} == FALSE
@@ -492,22 +513,22 @@ objectdef obj_Agents
 						avoidLowSec:Set[${Config.Missioneer.AvoidLowSec}]
 						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE)
 						{
-							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE && !${IsStoryline}
 							{
 								return TRUE
 							}
 
-							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE && !${IsStoryline}
 							{
 								return TRUE
 							}
 
-							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE && !${IsStoryline}
 							{
 								return TRUE
 							}
 
-							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE
+							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE && !${IsStoryline}
 							{
 								return TRUE
 							}
@@ -734,6 +755,7 @@ objectdef obj_Agents
 		{
 			Logger:Log["obj_Agents: ERROR: Mission details window was not found!"]
 			Logger:Log["obj_Agents: DEBUG: amIterator.Value.Name.Escape = ${amIterator.Value.Name.Escape}"]
+			;EVE:Execute[CmdCloseAllWindows]					  
 			return
 		}
 		; The embedded quotes look odd here, but this is required to escape the comma that exists in the caption and in the resulting html.
@@ -815,10 +837,10 @@ objectdef obj_Agents
 
 		variable float volume = 0
 
-		right:Set[${details.Escape.Find["msup3"]}]
+		right:Set[${details.Escape.Find["m³"]}]
 		if ${right} > 0
 		{
-			;Logger:Log["obj_Agents: DEBUG: Found \"msup3\" at ${right}."]
+			;Logger:Log["obj_Agents: DEBUG: Found \"m³\" at ${right}."]
 			right:Dec
 			left:Set[${details.Escape.Mid[${Math.Calc[${right}-16]},16].Find[" ("]}]
 			if ${left} > 0
@@ -833,12 +855,12 @@ objectdef obj_Agents
 			}
 			else
 			{
-				Logger:Log["obj_Agents: ERROR: Did not find number before \"msup3\"!"]
+				Logger:Log["obj_Agents: ERROR: Did not find number before \"m³\"!"]
 			}
 		}
 		else
 		{
-			Logger:Log["obj_Agents: DEBUG: Did not find \"msup3\".  No cargo???"]
+			Logger:Log["obj_Agents: DEBUG: Did not find \"m³\".  No cargo???"]
 		}
 
 		Missions.MissionCache:SetVolume[${amIterator.Value.AgentID},${volume}]
@@ -1073,10 +1095,10 @@ objectdef obj_Agents
 
 		variable float volume = 0
 
-		right:Set[${details.Escape.Find["msup3"]}]
+		right:Set[${details.Escape.Find["m³"]}]
 		if ${right} > 0
 		{
-			;Logger:Log["obj_Agents: DEBUG: Found \"msup3\" at ${right}."]
+			;Logger:Log["obj_Agents: DEBUG: Found \"m³\" at ${right}."]
 			right:Dec
 			left:Set[${details.Escape.Mid[${Math.Calc[${right}-16]},16].Find[" ("]}]
 			if ${left} > 0
@@ -1091,12 +1113,12 @@ objectdef obj_Agents
 			}
 			else
 			{
-				Logger:Log["obj_Agents: ERROR: Did not find number before \"msup3\"!"]
+				Logger:Log["obj_Agents: ERROR: Did not find number before \"m³\"!"]
 			}
 		}
 		else
 		{
-			Logger:Log["obj_Agents: DEBUG: Did not find \"msup3\".  No cargo???"]
+			Logger:Log["obj_Agents: DEBUG: Did not find \"m³\".  No cargo???"]
 		}
 
 		Missions.MissionCache:SetVolume[${amIterator.Value.AgentID},${volume}]
@@ -1157,7 +1179,11 @@ objectdef obj_Agents
 		{
 			Logger:Log["RequestMission: Saying ${dsIndex[1].Text}", LOG_DEBUG]
 			dsIndex[1]:Say[${This.AgentID}]
-		}
+			wait 20
+			warning:Set[${EVEWindow[Active].Name}]
+			if ${warning.Equal[modal]}
+			{
+			EVEWindow[Active]:ClickButtonYes
 		elseif ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE
 		{
 			Logger:Log["RequestMission: Saying ${dsIndex[1].Text}", LOG_DEBUG]
@@ -1167,7 +1193,11 @@ objectdef obj_Agents
 		{
 			Logger:Log["RequestMission: Saying ${dsIndex[1].Text}", LOG_DEBUG]
 			dsIndex[1]:Say[${This.AgentID}]
-		}
+			wait 20
+			warning:Set[${EVEWindow[Active].Name}]
+			if ${warning.Equal[modal]}
+			{
+			EVEWindow[Active]:ClickButtonYes
 		elseif ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE
 		{
 			Logger:Log["RequestMission: Saying ${dsIndex[1].Text}", LOG_DEBUG]
