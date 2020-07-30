@@ -17,7 +17,7 @@ objectdef obj_MissionCache
 
 	method Initialize()
 	{
-		LavishSettings[MissionCache]:Clear
+		LavishSettings[MissionCache]:Remove
 		LavishSettings:AddSet[MissionCache]
 		LavishSettings[MissionCache]:AddSet[${This.SET_NAME}]
 		LavishSettings[MissionCache]:Import[${This.CONFIG_FILE}]
@@ -27,7 +27,7 @@ objectdef obj_MissionCache
 	method Shutdown()
 	{
 		LavishSettings[MissionCache]:Export[${This.CONFIG_FILE}]
-		LavishSettings[MissionCache]:Clear
+		LavishSettings[MissionCache]:Remove
 	}
 
 	member:settingsetref MissionsRef()
@@ -241,8 +241,15 @@ objectdef obj_Missions
 
 		do
 		{
-			Cargo:FindShipCargoByType[${This.MissionCache.TypeID[${agentID}]}]
-			if ${Cargo.CargoToTransferCount} == 0
+			call Inventory.ShipCargo.Activate
+			if !${Inventory.ShipCargo.IsCurrent}
+			{
+				Logger:Log["RunCourierMission: Failed to activate ${Inventory.ShipCargo.EVEWindowParams}"]
+				return
+			}
+			Inventory.Current:GetItems[CargoIndex, "TypeID == ${This.MissionCache.TypeID[${agentID}]}"]
+
+			if ${CargoIndex.Used} == 0
 			{
 				Logger:Log["obj_Missions: MoveToPickup"]
 				call Agents.MoveToPickup
@@ -338,7 +345,7 @@ objectdef obj_Missions
 		if ${CargoIterator:First(exists)}
 		{
 			do
-			{ 
+			{
 				TypeID:Set[${CargoIterator.Value.TypeID}]
 				ItemQuantity:Set[${CargoIterator.Value.Quantity}]
 				Logger:Log["DEBUG: RunTradeMission: Ship's Cargo: ${ItemQuantity} units of ${CargoIterator.Value.Name}(${TypeID})."]
