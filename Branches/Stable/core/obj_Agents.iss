@@ -496,12 +496,12 @@ objectdef obj_Agents
 				if ${amIterator.Value.Type.Find[Storyline](exists)} && !${Config.Missioneer.RunStorylineMissions}
 				{
 					IsStoryline:Set[TRUE]
-					Logger:Log["Storyline ${IsStoryline}"]
+					;Logger:Log["Storyline ${IsStoryline}"]
 				}
 				else
 				{
 					IsStoryline:Set[FALSE]
-					Logger:Log["Storyline ${IsStoryline}"]
+					;Logger:Log["Storyline ${IsStoryline}"]
 				}													   
 				if ${amIterator.Value.State} > 1
 				{
