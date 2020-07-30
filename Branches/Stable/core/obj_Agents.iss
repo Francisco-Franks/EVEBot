@@ -335,27 +335,27 @@ objectdef obj_Agents
 						variable bool avoidLowSec
 						isLowSec:Set[${Missions.MissionCache.LowSec[${amIterator.Value.AgentID}]}]
 						avoidLowSec:Set[${Config.Missioneer.AvoidLowSec}]
-						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE)
+						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE) && !${IsStoryline}
 						{
-							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE 
 							{
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
 								return
 							}
 
-							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE 
 							{
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
 								return
 							}
 
-							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE 
 							{
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
 								return
 							}
 
-							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE 
 							{
 								Logger:Log["Setting ActiveAgent to ${EVE.Agent[id,${amIterator.Value.AgentID}].Name}", LOG_DEBUG]
 								This:SetActiveAgent[${EVE.Agent[id,${amIterator.Value.AgentID}].Name}]
@@ -496,12 +496,12 @@ objectdef obj_Agents
 				if ${amIterator.Value.Type.Find[Storyline](exists)} && !${Config.Missioneer.RunStorylineMissions}
 				{
 					IsStoryline:Set[TRUE]
-					UI:UpdateConsole["${Storyline IsStoryline}"]
+					Logger:Log["Storyline ${IsStoryline}"]
 				}
 				else
 				{
 					IsStoryline:Set[FALSE]
-					UI:UpdateConsole["${Storyline IsStoryline}"]
+					Logger:Log["Storyline ${IsStoryline}"]
 				}													   
 				if ${amIterator.Value.State} > 1
 				{
@@ -511,24 +511,24 @@ objectdef obj_Agents
 						variable bool avoidLowSec
 						isLowSec:Set[${Missions.MissionCache.LowSec[${amIterator.Value.AgentID}]}]
 						avoidLowSec:Set[${Config.Missioneer.AvoidLowSec}]
-						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE)
+						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE) && !${IsStoryline}
 						{
-							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE
 							{
 								return TRUE
 							}
 
-							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE
 							{
 								return TRUE
 							}
 
-							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Mining](exists)} && ${Config.Missioneer.RunMiningMissions} == TRUE
 							{
 								return TRUE
 							}
 
-							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE && !${IsStoryline}
+							if ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE
 							{
 								return TRUE
 							}
