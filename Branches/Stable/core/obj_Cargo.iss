@@ -865,7 +865,8 @@ objectdef obj_Cargo
 				}
 				while ${CargoIterator:Next(exists)}
 			}
-			wait 10
+				; Wait a bit to let the eve client move the cargo
+				wait 20
 		}
 	}
 
@@ -1284,6 +1285,8 @@ objectdef obj_Cargo
 				EVEWindow[ByItemID, ${MyShip.ID}]:StackAll
 				Ship:UpdateBaselineUsedCargo[]
 
+				call Inventory.StationHangar.Activate ${Me.Station.ID}
+
 				; Re-check the cargo.
 				Inventory.Current:GetItems[This.CargoToTransfer, ${querystr}]
 				if ${This.CargoToTransfer.Used} > 0
@@ -1311,7 +1314,7 @@ objectdef obj_Cargo
 	  Logger:Log["Transferring Cargo to Station Hangar"]
 
 		call Inventory.ShipCargo.Activate
-		if !${Inventory.ShipCargo.IsCurrent}
+		if ${Inventory.ShipCargo.IsCurrent}
 		{
 			Inventory.Current:GetItems[This.CargoToTransfer, "TypeID == ${typeID}"]
 		  call This.TransferListToStationHangar
