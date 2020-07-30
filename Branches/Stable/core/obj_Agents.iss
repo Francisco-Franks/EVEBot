@@ -317,7 +317,7 @@ objectdef obj_Agents
 				Logger:Log["obj_Agents: DEBUG: amIterator.Value.AgentID = ${amIterator.Value.AgentID}"]
 				Logger:Log["obj_Agents: DEBUG: amIterator.Value.State = ${amIterator.Value.State}"]
 				Logger:Log["obj_Agents: DEBUG: amIterator.Value.Type = ${amIterator.Value.Type}"]
-				if ${amIterator.Value.Type.Find[Storyline](exists)}
+				if ${amIterator.Value.Type.Find[Storyline](exists)} && !${Config.Missioneer.RunStorylineMissions}
 				{
 					IsStoryline:Set[TRUE]
 					Logger:Log["Storyline ${IsStoryline}"]
@@ -493,7 +493,7 @@ objectdef obj_Agents
 		{
 			do
 			{
-				if ${amIterator.Value.Type.Find[Storyline](exists)}
+				if ${amIterator.Value.Type.Find[Storyline](exists)} && !${Config.Missioneer.RunStorylineMissions}
 				{
 					IsStoryline:Set[TRUE]
 					UI:UpdateConsole["${Storyline IsStoryline}"]
@@ -1185,6 +1185,8 @@ objectdef obj_Agents
 			if ${warning.Equal[modal]}
 			{
 			EVEWindow[Active]:ClickButtonYes
+			}
+		}
 		elseif ${amIterator.Value.Type.Find[Trade](exists)} && ${Config.Missioneer.RunTradeMissions} == TRUE
 		{
 			Logger:Log["RequestMission: Saying ${dsIndex[1].Text}", LOG_DEBUG]
@@ -1199,6 +1201,8 @@ objectdef obj_Agents
 			if ${warning.Equal[modal]}
 			{
 			EVEWindow[Active]:ClickButtonYes
+			}
+		}
 		elseif ${amIterator.Value.Type.Find[Encounter](exists)} && ${Config.Missioneer.RunKillMissions} == TRUE
 		{
 			Logger:Log["RequestMission: Saying ${dsIndex[1].Text}", LOG_DEBUG]
