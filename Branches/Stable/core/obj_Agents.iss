@@ -888,7 +888,7 @@ objectdef obj_Agents
 		while ${dsIndex.Used} == 0
 		{
 			Logger:Log["Waiting for responses from agent to populate."]
-			wait 10
+			wait 40
 		}
 		if ${dsIndex.Used.Equal[2]} && ${dsIndex[1].Text.Find["View"]} > 0 || ${dsIndex[1].Text.Find["Request"]} > 0
 		{
@@ -931,6 +931,7 @@ objectdef obj_Agents
 		;; The dialog caption fills in long before the details do.
 		;; Wait for dialog strings to become valid before proceeding.
 		Logger:Log["Waiting for responses from agent to populate..."]
+		wait 20
 		variable int WaitCount
 		for( WaitCount:Set[0]; ${WaitCount} < 15; WaitCount:Inc )
 		{
