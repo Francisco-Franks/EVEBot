@@ -837,7 +837,7 @@ objectdef obj_Agents
 
 		variable float volume = 0
 
-		right:Set[${details.URLEncode.Find["m%C2%B3"]}]
+		right:Set[${details.Escape.Find["m³"]}]
 		if ${right} > 0
 		{
 			;Logger:Log["obj_Agents: DEBUG: Found \"m³\" at ${right}."]
@@ -1096,7 +1096,7 @@ objectdef obj_Agents
 
 		variable float volume = 0
 
-		right:Set[${details.URLEncode.Find["m%C2%B3"]}]
+		right:Set[${details.Escape.Find["m³"]}]
 		if ${right} > 0
 		{
 			;Logger:Log["obj_Agents: DEBUG: Found \"m³\" at ${right}."]
