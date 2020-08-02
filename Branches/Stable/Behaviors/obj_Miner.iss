@@ -883,12 +883,12 @@ objectdef obj_Miner
 		}
 
 		;	If our ship has no mining lasers, panic so the user knows to correct their configuration and try again
-		if ${Ship.TotalMiningLasers} == 0
-		{
-			Logger:Log["ALERT: No mining lasers detected.  Returning to station."]
-			EVEBot.ReturnToStation:Set[TRUE]
-			return
-		}
+		;if ${Ship.TotalMiningLasers} == 0
+		;{
+		;	Logger:Log["ALERT: No mining lasers detected.  Returning to station."]
+		;	EVEBot.ReturnToStation:Set[TRUE]
+		;	return
+		;}
 
 		Orca:Set[Name = "${Config.Miner.DeliveryLocation}"]
 		Master:Set[Name = "${MasterName}"]
