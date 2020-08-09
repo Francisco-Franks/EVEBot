@@ -904,6 +904,7 @@ objectdef obj_Agents
 	{
 		variable index:dialogstring dsIndex
 		variable iterator dsIterator
+		variable string warning
 
 		if ${EVE.Agent[${This.AgentIndex}].Division.Equal["R&D"]}
 		{
