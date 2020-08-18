@@ -104,7 +104,10 @@ objectdef obj_EVEBot inherits obj_BaseClass
 				{
 					EVEWindow[ByName,modal]:ClickButtonOK
 				}
-				EVE:CloseAllMessageBoxes
+				if !${EVEWindow[ByName,modal].Text.Find["cargo"](exists)}
+				{
+					EVE:CloseAllMessageBoxes
+				}
 				EVE:CloseAllChatInvites
 
 				/*
