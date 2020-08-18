@@ -882,6 +882,7 @@ objectdef obj_Miner
 			return
 		}
 
+		; Remove this check for now. There's a timing issue with undocking and getting module inventory.
 		;	If our ship has no mining lasers, panic so the user knows to correct their configuration and try again
 		;if ${Ship.TotalMiningLasers} == 0
 		;{
