@@ -97,6 +97,33 @@ objectdef obj_EVEBot inherits obj_BaseClass
 					Logger:Log["Enabling 3D Rendering"]
 				}
 			}
+			
+			if ${Me.InSpace} && !${Ship.IsCloaked} && ${Me.ToEntity.Mode} == 3 && ${Ship.HasCovOpsCloak}
+			{
+				;variable index:entity NearbyStation
+				;EVE:QueryEntities[NearbyStation, "Distance < 2500"]
+				;NearbyStation:RemoveByQuery[${LavishScript.CreateQuery["Distance < 2500"]}]
+				;NearbyStation:Collapse
+				
+				if ${Ship.ClearToCloak} == TRUE
+				{
+					Ship:Activate_Cloak
+				}
+			}
+			
+			if ${Me.InSpace} && ${Ship.HasCovOpsCloak}
+			{
+				;variable index:entity NearbyGate
+				;EVE:QueryEntities[NearbyGate, "GroupID = GROUP_STARGATE"]
+				;NearbyGate:RemoveByQuery[${LavishScript.CreateQuery["Distance >= 5000"]}]
+				;NearbyGate:Collapse
+				
+				if ${Ship.IsCloaked} && ${Ship.MustDecloak} == TRUE
+				{
+					Ship:Deactivate_Cloak
+				}
+				
+			}
 
 			if !${This._Paused}
 			{

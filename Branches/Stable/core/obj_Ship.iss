@@ -2139,7 +2139,47 @@ objectdef obj_Ship
 		This.ModuleList_SurveyScanners:GetIterator[aModuleIterator]
 		return ${aModuleIterator:First(exists)}
 	}
-
+	
+	member:bool ClearToCloak()
+	{	
+		variable bool CTC = FALSE
+        {
+			variable index:entity NearbyStation
+			EVE:QueryEntities[NearbyStation, !IsPC]
+			NearbyStation:RemoveByQuery[${LavishScript.CreateQuery["Distance > 2500"]}]
+			NearbyStation:Collapse
+			
+            Logger:Log["CTC"]
+			
+            if ${NearbyStation.Used} == 0
+            {
+				CTC:Set[TRUE]
+				Logger:Log["Clear To Cloak"]
+            }
+		return ${CTC}
+        }
+	}
+	
+	member:bool MustDecloak()
+	{	
+		variable bool MDC = FALSE
+        {
+			variable index:entity NearbyGate
+			EVE:QueryEntities[NearbyGate, !IsPC && Distance < 5000 && GroupID = 10]
+			;NearbyStation:RemoveByQuery[${LavishScript.CreateQuery["Distance < 2500"]}]
+			NearbyGate:Collapse
+			
+            Logger:Log["MDC"]
+			
+            if ${NearbyGate.Used} > 0
+            {
+				MDC:Set[TRUE]
+				Logger:Log["Must Decloak"]
+            }
+		return ${MDC}
+        }
+	}
+	
 	method Activate_SurveyScanner()
 	{
 		if !${MyShip(exists)}
