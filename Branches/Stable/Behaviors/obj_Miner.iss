@@ -1055,19 +1055,11 @@ objectdef obj_Miner
 			;	This performs Orca deliveries if we've got at least a tenth of our cargo hold full
 			if (${MyShip.HasOreHold} && ${Ship.OreHoldHalfFull}) || ${Ship.CargoTenthFull}
 			{
-				;	Open the Orca if it's not open yet
-				if ${Entity[${Orca.Escape}](exists)} && ${Entity[${Orca.Escape}].Distance} <= LOOT_RANGE && !${EVEWindow[ByItemID, ${Entity[${Orca.Escape}]}](exists)}
-				{
-					Logger:Log["Opening ${Entity[${Orca.Escape}].Name}'s Corporate Hangars"]
-					Entity[${Orca.Escape}]:Open
-					return
-				}
-
-				if ${Entity[${Orca.Escape}](exists)} && ${Entity[${Orca.Escape}].Distance} <= LOOT_RANGE && ${EVEWindow[ByItemID, ${Entity[${Orca.Escape}]}](exists)}
+				if ${Entity[${Orca.Escape}](exists)} && ${Entity[${Orca.Escape}].Distance} <= LOOT_RANGE
 				{
 					Logger:Log["Emptying ore to ${Entity[${Orca.Escape}].Name}'s Corporate Hangars"]
-					call Cargo.TransferOreToShipCorpHangar ${Entity[${Orca.Escape}]}
-					call Cargo.ReplenishCrystals ${Entity[${Orca.Escape}]}
+					call Cargo.TransferOreToShipCorpHangar ${Entity[${Orca.Escape}].ID}
+					call Cargo.ReplenishCrystals ${Entity[${Orca.Escape}].ID}
 				}
 			}
 		}
@@ -1467,15 +1459,16 @@ BUG - This is broken. It relies on the activatarget, there's no checking if they
 			}
 			else
 			{
+				; Orca Base cargo space: Cargo: 30k, Ore: 150k, Fleet: 40k
 				if !${Ship.OreHoldFull} && !${Config.Miner.DeliveryLocationTypeName.Equal["Jetcan"]}
 				{
-					call Cargo.TransferCargoFromShipCorporateHangarToOreHold
+					call Cargo.TransferOreFromShipFleetHangarToOreHold
 					Ship:StackOreHold
 					return
 				}
 				if !${Ship.CargoFull}
 				{
-					call Cargo.TransferCargoFromShipCorporateHangarToCargoHold
+					call Cargo.TransferOreFromShipFleetHangarToCargoHold
 					Ship:StackCargoHold
 					return
 				}
