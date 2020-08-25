@@ -190,6 +190,7 @@ objectdef obj_Agents
 	variable int RetryCount = 0
 	variable obj_AgentList AgentList
 	variable obj_MissionBlacklist MissionBlacklist
+  variable bool IsStoryline
 
     method Initialize()
     {
@@ -332,6 +333,16 @@ objectdef obj_Agents
 				Logger:Log["obj_Agents: DEBUG: MissionInfo.AgentID = ${MissionInfo.Value.AgentID}"]
 				Logger:Log["obj_Agents: DEBUG: MissionInfo.State = ${MissionInfo.Value.State}"]
 				Logger:Log["obj_Agents: DEBUG: MissionInfo.Type = ${MissionInfo.Value.Type}"]
+ 				if ${MissionInfo.Value.Type.Find[Storyline](exists)} && !${Config.Missioneer.RunStorylineMissions}
+				{
+					IsStoryline:Set[TRUE]
+					Logger:Log["Storyline ${IsStoryline}"]
+				}
+				else
+				{
+					IsStoryline:Set[FALSE]
+					Logger:Log["Storyline ${IsStoryline}"]
+				}	
 				if ${MissionInfo.Value.State} == 1
 				{
 					variable bool isLowSec
@@ -339,6 +350,7 @@ objectdef obj_Agents
 
 					if (!${Config.Missioneer.AvoidLowSec} || \
 						(${Config.Missioneer.AvoidLowSec} && !${isLowSec})) && \
+            !${IsStoryline} && \
 						!${MissionBlacklist.IsBlacklisted[${Agent[id,${MissionInfo.Value.AgentID}].Level},"${MissionInfo.Value.Name}"]}
 					{
 						if (${MissionInfo.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions}) || \
@@ -477,6 +489,17 @@ objectdef obj_Agents
 		{
 			do
 			{
+				if ${MissionInfo.Value.Type.Find[Storyline](exists)} && !${Config.Missioneer.RunStorylineMissions}
+				{
+					IsStoryline:Set[TRUE]
+					;Logger:Log["Storyline ${IsStoryline}"]
+				}
+				else
+				{
+					IsStoryline:Set[FALSE]
+					;Logger:Log["Storyline ${IsStoryline}"]
+				}													   
+
 				if ${amIterator.Value.State} > 1
 				{
 					variable bool isLowSec
@@ -484,6 +507,7 @@ objectdef obj_Agents
 
 					if (!${Config.Missioneer.AvoidLowSec} || \
 						(${Config.Missioneer.AvoidLowSec} && !${isLowSec})) && \
+            !${IsStoryline} && \
 						!${MissionBlacklist.IsBlacklisted[${Agent[id,${MissionInfo.Value.AgentID}].Level},"${MissionInfo.Value.Name}"]}
 					{
 						if (${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions}) || \
@@ -496,11 +520,11 @@ objectdef obj_Agents
 								return TRUE
 							}
 							else
+
 							{
 								Missions.MissionCache:AddMission[${amIterator.Value.AgentID},${amIterator.Value.Name}]
 								return TRUE
 							}
-
 						}
 					}
 				}
@@ -774,6 +798,7 @@ objectdef obj_Agents
 	{
 		variable index:dialogstring dsIndex
 		variable iterator dsIterator
+		variable string warning
 
 		Logger:Log["obj_Agents:RequestMission: Starting conversation with agent ${This.ActiveAgent}."]
 		EVE.Agent[${This.AgentIndex}]:StartConversation
