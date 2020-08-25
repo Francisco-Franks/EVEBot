@@ -294,7 +294,7 @@ objectdef obj_Hauler
 				{
 					Logger:Log["Docking at ${Entity["(GroupID = 15 || GroupID = 1657)"].Name}"]
 					call Miner.FastWarp ${Entity["(GroupID = 15 || GroupID = 1657)"].ID}
-					call This.DockAtStation ${Entity["(GroupID = 15 || GroupID = 1657)"].ID}
+					call Station.DockAtStation ${Entity["(GroupID = 15 || GroupID = 1657)"].ID}
 					break
 				}
 
@@ -711,14 +711,11 @@ objectdef obj_Hauler
 		;	Open the Orca if it's not open yet
 		if ${OrcaID} && ${Entity[${OrcaID}].Distance} <= LOOT_RANGE
 		{
-			if !${EVEWindow[ByItemID, ${OrcaID}](exists)}
+			if ${MyShip.HasOreHold}
 			{
-				Logger:Log["ALERT: Open Hangar."]
-				Entity[${OrcaID}]:Open
-				return
+				call Cargo.TransferOreFromEntityFleetHangarToOreHold ${OrcaID}
 			}
-			Logger:Log["ALERT: Transferring Cargo"]
-			call Cargo.TransferListFromShipCorporateHangar ${OrcaID}
+			call Cargo.TransferOreFromEntityFleetHangarToCargoHold ${OrcaID}
 		}
 
 		return
@@ -978,11 +975,6 @@ objectdef obj_Hauler
 						Cargo.Value:MoveTo[MyShip,CargoHold,${QuantityToMove}]
 						wait 20
 					}
-				}
-				if ${Ship.CargoFreeSpace} < 1000
-				{
-					Logger:Log["DEBUG: obj_Hauler.LootEntity: Ship Cargo Free Space: ${Ship.CargoFreeSpace} < ${Ship.CargoMinimumFreeSpace}"]
-					break
 				}
 			}
 			while ${Cargo:Next(exists)}
