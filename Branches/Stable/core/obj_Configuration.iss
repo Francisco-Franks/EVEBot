@@ -1781,6 +1781,7 @@ objectdef obj_Configuration_Missioneer
 	{
 		BaseConfig.BaseRef:AddSet[${This.SetName}]
 
+		This.MissioneerRef:AddSetting[Run Storyline Missions, TRUE]		
 		This.MissioneerRef:AddSetting[Run Courier Missions, TRUE]
 		This.MissioneerRef:AddSetting[Run Trade Missions, FALSE]
 		This.MissioneerRef:AddSetting[Run Mining Missions, FALSE]
@@ -1796,6 +1797,16 @@ objectdef obj_Configuration_Missioneer
 		This.MissioneerRef:AddSetting[Small Hauler Limit, 600]
 	}
 
+	member:bool RunStorylineMissions()
+	{
+		return ${This.MissioneerRef.FindSetting[Run Storyline Missions, TRUE]}
+	}
+
+	method SetRunStorylineMissions(bool value)
+	{
+		This.MissioneerRef:AddSetting[Run Storyline Missions, ${value}]
+	}
+	
 	member:bool RunCourierMissions()
 	{
 		return ${This.MissioneerRef.FindSetting[Run Courier Missions, TRUE]}

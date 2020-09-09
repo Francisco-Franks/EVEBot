@@ -9,8 +9,11 @@
 	-- GliderPro
 */
 
-objectdef obj_Freighter inherits obj_BaseClass
+objectdef obj_Freighter
 {
+	variable time NextPulse
+	variable float PulseIntervalInSeconds = 2.0
+
 	variable string CurrentState
 
 	variable queue:bookmark SourceLocations
@@ -23,19 +26,18 @@ objectdef obj_Freighter inherits obj_BaseClass
 
 	method Initialize()
 	{
-		LogPrefix:Set["${This.ObjectName}"]
+		This:SetupEvents[]
 
 		m_DestinationID:Set[0]
 
-		/* I didn't want this here but it was the only way to get this to work properly.  When Bookmark:Remove
-		 * works this can be moved into the state machine and PickupOrDropoff can delete the station bookmarks.
+		/* I didn't want this here but it was the only way to
+		 * get this to work properly.  When Bookmark:Remove
+		 * works this can be moved into the state machine and
+		 * PickupOrDropoff can delete the station bookmarks.
 		 */
 		This:BuildSourceList
-		This:SetupEvents
 
-		PulseTimer:SetIntervals[2.0, 4.0]
-
-		Logger:Log["${LogPrefix}: Initialized", LOG_MINOR]
+		Logger:Log["obj_Freighter: Initialized", LOG_MINOR]
 	}
 
 	method Pulse()
@@ -50,7 +52,7 @@ objectdef obj_Freighter inherits obj_BaseClass
 			return
 		}
 
-		if ${This.PulseTimer.Ready}
+	    if ${Time.Timestamp} >= ${This.NextPulse.Timestamp}
 		{
 			switch ${Config.Freighter.FreighterModeName}
 			{
@@ -70,7 +72,10 @@ objectdef obj_Freighter inherits obj_BaseClass
 					This:SetState[]
 					break
 			}
-			This.PulseTimer:Update
+
+			This.NextPulse:Set[${Time.Timestamp}]
+			This.NextPulse.Second:Inc[${This.PulseIntervalInSeconds}]
+			This.NextPulse:Update
 		}
 	}
 
@@ -121,11 +126,7 @@ objectdef obj_Freighter inherits obj_BaseClass
 						Logger:Log["Aborting operation: Returning to base"]
 						if ${EVE.Bookmark[${Config.Freighter.Destination}](exists)}
 						{
-							Navigator:FlyToBookmark["${Config.Freighter.Destination}"]
-							while ${Navigator.Busy}
-							{
-								wait 10
-							}
+							call Ship.WarpToBookMarkName "${Config.Freighter.Destination}"
 						}
 						break
 					case BASE
@@ -140,11 +141,7 @@ objectdef obj_Freighter inherits obj_BaseClass
 					case CARGOFULL
 						if ${EVE.Bookmark[${Config.Freighter.Destination}](exists)}
 						{
-							Navigator:FlyToBookmark["${Config.Freighter.Destination}"]
-							while ${Navigator.Busy}
-							{
-								wait 10
-							}
+							call Ship.WarpToBookMarkName "${Config.Freighter.Destination}"
 						}
 						break
 				}
@@ -167,7 +164,7 @@ objectdef obj_Freighter inherits obj_BaseClass
 			This.ExcessCargoAtSource:Set[FALSE]
 		}
 
-		if ${EVEBot.ReturnToStation} && ${Me.InSpace}
+		if ${EVEBot.ReturnToStation} && !${Me.InStation}
 		{
 			This.CurrentState:Set["ABORT"]
 		}
@@ -260,11 +257,7 @@ objectdef obj_Freighter inherits obj_BaseClass
 		}
 		elseif ${SourceLocations.Peek(exists)}
 		{
-			Navigator:FlyToBookmark["${SourceLocations.Peek.ID}"]
-			while ${Navigator.Busy}
-			{
-				wait 10
-			}
+			call Ship.WarpToBookMark ${SourceLocations.Peek.ID}
 		}
 	}
 

@@ -169,8 +169,6 @@ objectdef obj_EVEBot inherits obj_BaseClass
 					Event[EVENT_EVEBOT_ONFRAME_INSPACE]:Execute
 				}
 
-				; Call Pulse here, to avoid each Behavior triggering on pulse
-				;${Config.Common.Behavior}:Pulse
 				Event[EVENT_EVEBOT_ONFRAME]:Execute
 
 			}
@@ -187,7 +185,7 @@ objectdef obj_EVEBot inherits obj_BaseClass
 			return ${This.LastSessionResult}
 		}
 
-		if ${Me.InSpace} || ${Me.InStation}
+		if ${ISXEVE.IsSafe} && (${Me.InSpace} || ${Me.InStation})
 		{
 			This.LastSessionFrame:Set[${Script.RunningTime}]
 			This.LastSessionResult:Set[TRUE]
@@ -218,6 +216,7 @@ objectdef obj_EVEBot inherits obj_BaseClass
 	method Pause(string Reason)
 	{
 		Logger:Log["\agPaused\ax: ${Reason}", LOG_ECHOTOO]
+		EVE:Execute[CmdStopShip]
 		This._Paused:Set[TRUE]
 		Script:Pause
 	}

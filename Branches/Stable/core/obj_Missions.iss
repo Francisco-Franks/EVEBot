@@ -241,15 +241,15 @@ objectdef obj_Missions
 
 		do
 		{
-			call Inventory.ShipCargo.Activate
-			if !${Inventory.ShipCargo.IsCurrent}
-			{
-				Logger:Log["RunCourierMission: Failed to activate ${Inventory.ShipCargo.EVEWindowParams}"]
-				return
-			}
-			Inventory.Current:GetItems[CargoIndex, "TypeID == ${This.MissionCache.TypeID[${agentID}]}"]
+            call Inventory.ShipCargo.Activate
+            if !${Inventory.ShipCargo.IsCurrent}
+            {
+                Logger:Log["RunCourierMission: Failed to activate ${Inventory.ShipCargo.EVEWindowParams}"]
+                return
+            }
+            Inventory.Current:GetItems[CargoIndex, "TypeID == ${This.MissionCache.TypeID[${agentID}]}"]
 
-			if ${CargoIndex.Used} == 0
+            if ${CargoIndex.Used} == 0
 			{
 				Logger:Log["obj_Missions: MoveToPickup"]
 				call Agents.MoveToPickup

@@ -13,8 +13,9 @@
  * be very straightforward to turn obj_Scavenger into a independent
  * bot-module in the future if it outgrows its place in obj_Freighter.
  */
-objectdef obj_Scavenger inherits obj_BaseClass
+objectdef obj_Scavenger
 {
+	/* the bot logic is currently based on a state machine */
 	variable string CurrentState
 	variable bool bHaveCargo = FALSE
 
@@ -23,20 +24,13 @@ objectdef obj_Scavenger inherits obj_BaseClass
 
 	method Initialize()
 	{
-		LogPrefix:Set["${This.ObjectName}"]
-
 		; Not a top level behavior
 		Behaviors.Loaded:Remove[${This.ObjectName}]
-
-		;PulseTimer:SetIntervals[0.5,1.0]
-		;Event[EVENT_EVEBOT_ONFRAME]:AttachAtom[This:Pulse]
-
-		Logger:Log["${LogPrefix}: Initialized", LOG_MINOR]
+		Logger:Log["obj_Scavenger: Initialized", LOG_MINOR]
 	}
 
 	method Shutdown()
 	{
-		;Event[EVENT_EVEBOT_ONFRAME]:DetachAtom
 	}
 
 	/* NOTE: The order of these if statements is important!! */
@@ -47,7 +41,7 @@ objectdef obj_Scavenger inherits obj_BaseClass
 			return
 		}
 
-		if ${EVEBot.ReturnToStation} && ${Me.InSpace}
+		if ${EVEBot.ReturnToStation} && !${Me.InStation}
 		{
 			This.CurrentState:Set["ABORT"]
 		}
@@ -74,39 +68,37 @@ objectdef obj_Scavenger inherits obj_BaseClass
 
 	function ProcessState()
 	{
-		if ${Config.Common.CurrentBehavior.NotEqual[Scavenger]}
-		{
-			return
-		}
+		if !${Config.Common.CurrentBehavior.Equal[Freighter]}
+		return
 
 		switch ${This.CurrentState}
 		{
 			case ABORT
-				call Station.Dock
-				break
+			call Station.Dock
+			break
 			case SCAVENGE
-				wait 10
-				call This.SalvageSite
-				;call Asteroids.MoveToRandomBeltBookMark
-				;wait 10
-				;call This.WarpToFirstNonEmptyWreck
-				;wait 10
-				;call This.LootClosestWreck
-				break
+			wait 10
+			call This.SalvageSite
+			;call Asteroids.MoveToRandomBeltBookMark
+			;wait 10
+			;call This.WarpToFirstNonEmptyWreck
+			;wait 10
+			;call This.LootClosestWreck
+			break
 			case DROPOFFTOSTATION
-				call Station.Dock
-				wait 100
-				call Cargo.TransferCargoToStationHangar
-				wait 100
-				break
+			call Station.Dock
+			wait 100
+			call Cargo.TransferCargoToStationHangar
+			wait 100
+			break
 			case DROPOFFTOCHA
-				call This.DropAtCHA
-				break
+			call This.DropAtCHA
+			break
 			case FLEE
-				call This.Flee
-				break
+			call This.Flee
+			break
 			case IDLE
-				break
+			break
 		}
 	}
 

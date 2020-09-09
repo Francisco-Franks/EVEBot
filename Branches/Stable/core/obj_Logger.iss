@@ -90,8 +90,8 @@ objectdef obj_Logger
 
 			for (Count:Set[1]; ${Count}<=${Indent}; Count:Inc)
 			{
-				msg:Concat[" "]
-			}
+  				msg:Concat[" "]
+  			}
  			msg:Concat["${StatusMessage.Escape}"]
 
 			if ${This.Reloaded}
@@ -100,9 +100,7 @@ objectdef obj_Logger
 				{
 					UIElement[StatusConsole@Status@EVEBotOptionsTab@EVEBot]:Echo["${msg}"]
 				}
-#ifdef EVEBOT_TESTCASE
-					echo "${msg}"
-#endif
+
 				if ${Level} == LOG_ECHOTOO
 				{
 					echo "${msg}"

@@ -15,7 +15,7 @@
  * bot-module in the future if it outgrows its place in obj_Freighter.
  */
 
-objectdef obj_StealthHauler inherits obj_BaseClass
+objectdef obj_StealthHauler
 {
 	variable index:int apRoute
 	variable index:int apWaypoints
@@ -23,20 +23,14 @@ objectdef obj_StealthHauler inherits obj_BaseClass
 
 	method Initialize()
 	{
-		LogPrefix:Set["${This.ObjectName}"]
-
 		; Not a top level behavior
 		Behaviors.Loaded:Remove[${This.ObjectName}]
 
-		;PulseTimer:SetIntervals[0.5,1.0]
-		;Event[EVENT_EVEBOT_ONFRAME]:AttachAtom[This:Pulse]
-
-		Logger:Log["${LogPrefix}: Initialized", LOG_MINOR]
+		Logger:Log["obj_StealthHauler: Initialized", LOG_MINOR]
 	}
 
 	method Shutdown()
 	{
-		;Event[EVENT_EVEBOT_ONFRAME]:DetachAtom
 	}
 
 	method SetState()
@@ -74,7 +68,7 @@ objectdef obj_StealthHauler inherits obj_BaseClass
 				{
 					variable index:entity sgIndex
 					variable iterator     sgIterator
-					EVE:QueryEntities[sgIndex, "GroupID = GROUP_STARGATE && Name = \"${Universe[${apIterator.Value}].Name}\""]
+					EVE:QueryEntities[sgIndex, "GroupID = GROUP_STARGATE && Name = ${Universe[${apIterator.Value}].Name}"]
 					sgIndex:GetIterator[sgIterator]
 					if ${sgIterator:First(exists)}
 					{
@@ -84,7 +78,7 @@ objectdef obj_StealthHauler inherits obj_BaseClass
 							Me:SetVelocity[${Math.Calc[90 + ${Math.Rand[9]} + ${Math.Calc[0.10 * ${Math.Rand[9]}]}]}]
 							do
 							{
-								wait 5
+							   	wait 5
 							}
 							while ${Me.ToEntity.IsCloaked}
 							Ship:Activate_AfterBurner
@@ -92,24 +86,21 @@ objectdef obj_StealthHauler inherits obj_BaseClass
 							do
 							{
 								Ship:Activate_Cloak
-								wait 10
+							   	wait 10
 							}
 							while !${Me.ToEntity.IsCloaked}
 							do
 							{
-								wait 5
+							   wait 5
 							}
 							while ${Me.ToEntity.IsWarpScrambled}
 							wait 5
-							Navigator:FlyToEntityID["${sgIterator.Value.ID}", JUMP_RANGE]
-							while ${Navigator.Busy}
-							{
-								wait 10
-							}
+							call Ship.WarpToID ${sgIterator.Value.ID}
+							call Ship.Approach ${sgIterator.Value.ID} JUMP_RANGE
 							Ship:Deactivate_Cloak
 							do
 							{
-								wait 5
+							   	wait 5
 							}
 							while ${Me.ToEntity.IsCloaked}
 							wait 5

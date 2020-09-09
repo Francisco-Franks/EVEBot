@@ -43,21 +43,13 @@ objectdef obj_Missioneer inherits obj_BaseClass
 			return
 		}
 
-;		if ${Defense.Hiding}
-;		{
-;			This.CurrentState:Set["IDLE"]
-;		}
-		if ${EVEBot.ReturnToStation} && ${Me.InSpace}
+		if ${EVEBot.ReturnToStation} && !${Me.InStation}
 		{
 			This.CurrentState:Set["ABORT"]
 		}
 		elseif ${EVEBot.ReturnToStation}
 		{
 			This.CurrentState:Set["IDLE"]
-		}
-		elseif ${This.CurentState.Equal["RUN_MISSION"]}
-		{
-			return
 		}
 		elseif ${Agents.HaveMission}
 		{

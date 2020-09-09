@@ -180,10 +180,12 @@ objectdef obj_Cargo
 		}
 		else
 		{
-			call Inventory.OpenEntityFleetHangar ${from}
-			call Inventory.EntityFleetHangar.Activate ${Return}
-			Inventory.Current:GetItems[]
-			Inventory.Current.Items:GetIterator[CargoIterator]
+			; TODO - Convert to Inventory object after Entity testing is done
+			variable index:item HangarCargo
+			Entity[${from}]:Open
+			wait 30
+			Entity[${from}]:GetCorpHangarsCargo[HangarCargo]
+			HangarCargo:GetIterator[CargoIterator]
 
 			; Cycle thru the Hangar looking for the needed Crystals and move them to the ship
 			if ${CargoIterator:First(exists)}
@@ -322,121 +324,99 @@ objectdef obj_Cargo
 
 	}
 
-	function TransferListToCargoHold(weakref ListToMove)
+	function TransferListFromShipCorporateHangar(int64 dest)
 	{
-		variable iterator ListIterator
+		variable index:item HangarCargo
+		variable iterator CargoIterator
+		variable float VolumeToMove=0
+		variable index:int64 ListToMove
 
-		ListToMove:GetIterator[ListIterator]
-		if ${ListIterator:First(exists)}
+; TODO - Convert to Inventory object once entity access tested
+		Entity[${dest}]:GetFleetHangarCargo[HangarCargo]
+		HangarCargo:RemoveByQuery[${LavishScript.CreateQuery[Name =- "Mining Crystal"]}]
+
+		HangarCargo:GetIterator[CargoIterator]
+
+		Logger:Log["DEBUG: TransferListFromShipCorporateHangar", LOG_DEBUG]
+
+		if ${CargoIterator:First(exists)}
 		{
 				do
 				{
-						QuantityToMove:Set[${ListIterator.Value.Quantity}]
-						if (${QuantityToMove} * ${ListIterator.Value.Volume}) >= ${Ship.OreHoldFreeSpace}
-						{
-							QuantityToMove:Set[${Math.Calc[${Ship.OreHoldFreeSpace} / ${ListIterator.Value.Volume}]}]
-						}
-
-						Logger:Log["TransferListToCargoHold: Loading Ore: ${QuantityToMove} units (${Math.Calc[${QuantityToMove} * ${ListIterator.Value.Volume}]}m3) of ${ListIterator.Value.Name}"]
-						if ${QuantityToMove} > 0
-						{
-							ListIterator.Value:MoveTo[${MyShip.ID}, CargoHold, ${QuantityToMove}]
-							wait 15
-						}
+					if (${CargoIterator.Value.Quantity} * ${CargoIterator.Value.Volume}) < ${Math.Calc[${Ship.CargoFreeSpace} - ${VolumeToMove}]}
+					{
+						ListToMove:Insert[${CargoIterator.Value.ID}]
+						VolumeToMove:Inc[${Math.Calc[${CargoIterator.Value.Quantity} * ${CargoIterator.Value.Volume}]}]
+					}
+					else
+					{
+						CargoIterator.Value:MoveTo[${MyShip.ID}, CargoHold, ${Math.Calc[(${Ship.CargoFreeSpace} - ${VolumeToMove}) / ${CargoIterator.Value.Volume}]}]
+						break
+					}
 				}
-				while ${ListIterator:Next(exists)}
-				return TRUE
-		}
-		else
-		{
-			Logger:Log["TransferListToCargoHold: Nothing found to move", LOG_WARNING]
-		}
-		return FALSE
-	}
-
-	function TransferListToOreHold(weakref ListToMove)
-	{
-		variable iterator ListIterator
-
-		ListToMove:GetIterator[ListIterator]
-		if ${ListIterator:First(exists)}
-		{
-				do
+				while ${CargoIterator:Next(exists)}
+				if ${ListToMove.Used}
 				{
-						QuantityToMove:Set[${ListIterator.Value.Quantity}]
-						if (${QuantityToMove} * ${ListIterator.Value.Volume}) >= ${Ship.OreHoldFreeSpace}
-						{
-							QuantityToMove:Set[${Math.Calc[${Ship.OreHoldFreeSpace} / ${ListIterator.Value.Volume}]}]
-						}
-
-						Logger:Log["TransferListToOreHold: Loading Ore: ${QuantityToMove} units (${Math.Calc[${QuantityToMove} * ${ListIterator.Value.Volume}]}m3) of ${ListIterator.Value.Name}"]
-						if ${QuantityToMove} > 0
-						{
-							ListIterator.Value:MoveTo[${MyShip.ID}, OreHold, ${QuantityToMove}]
-							wait 15
-						}
+					EVE:MoveItemsTo[ListToMove, MyShip, CargoHold]
 				}
-				while ${ListIterator:Next(exists)}
-				return TRUE
 		}
 		else
 		{
-			Logger:Log["TransferListToOreHold: Nothing found to move", LOG_WARNING]
-		}
-		return FALSE
-	}
-
-	function TransferOreFromEntityFleetHangarToCargoHold(int64 SourceID)
-	{
-		Logger:Log["Moving ore from Entity ${SourceID} to Ship Cargo Hold", LOG_DEBUG]
-
-		call Inventory.OpenEntityFleetHangar ${SourceID}
-		call Inventory.EntityFleetHangar.Activate ${SourceID}
-		if ${Inventory.EntityFleetHangar.IsCurrent}
-		{
-			Inventory.Current:GetItems[]
-			Inventory.Current.Items:RemoveByQuery[${LavishScript.CreateQuery[CategorityID != ${CategorityID}]}]
-			call TransferListToCargoHold Inventory.Current.Items
-		}
-	}
-
-	function TransferOreFromEntityFleetHangarToOreHold(int64 SourceID)
-	{
-		if !${MyShip.HasOreHold}
-		{
-			Logger:Log["TransferOreFromEntityFleetHangarToOreHold - No Ore Hold Detected!", LOG_DEBUG]
+			Logger:Log["DEBUG: obj_Cargo:TransferListFromShipCorporateHangar: Nothing found to move"]
 			return
 		}
-
-		Logger:Log["Moving ore from Entity ${SourceID} to Ship Ore Hold", LOG_DEBUG]
-
-		call Inventory.OpenEntityFleetHangar ${SourceID}
-		call Inventory.EntityFleetHangar.Activate ${SourceID}
-		if ${Inventory.EntityFleetHangar.IsCurrent}
-		{
-			Inventory.Current:GetItems[]
-			Inventory.Current.Items:RemoveByQuery[${LavishScript.CreateQuery[CategorityID != ${CategorityID}]}]
-			call TransferListToOreHold Inventory.Current.Items
-		}
 	}
 
-	; Transfer cargo from my ships fleet hangar to my ships ore hold
-	function TransferOreFromShipFleetHangarToOreHold()
+	function TransferCargoFromShipCorporateHangarToOreHold()
 	{
-		if !${MyShip.HasOreHold}
-		{
-			Logger:Log["TransferOreFromShipFleetHangarToOreHold - No Ore Hold Detected!", LOG_DEBUG]
-			return
-		}
-
-		Logger:Log["Moving ore from Ship Fleet Hangar to Ship Ore Hold", LOG_DEBUG]
+		variable int QuantityToMove
+		variable iterator CargoIterator
 
 		call Inventory.ShipFleetHangar.Activate
-		if ${Inventory.ShipFleetHangar.IsCurrent}
+		if !${Inventory.ShipFleetHangar.IsCurrent}
 		{
-			Inventory.Current:GetItems[]
-			Inventory.Current.Items:RemoveByQuery[${LavishScript.CreateQuery[CategorityID != CATEGORYID_ORE]}]
-			call TransferListToOreHold Inventory.Current.Items
+			return
+		}
+		Inventory.Current:GetItems[]
+		Inventory.Current.Items:GetIterator[CargoIterator]
+
+		Logger:Log["DEBUG: TransferCargoFromShipCorporateHangarToOreHold", LOG_DEBUG]
+
+		if ${CargoIterator:First(exists)}
+		{
+				do
+				{
+					if ${CargoIterator.Value.CategoryID} == CATEGORYID_ORE
+					{
+						if (${CargoIterator.Value.Quantity} * ${CargoIterator.Value.Volume}) > ${Ship.OreHoldFreeSpace}
+						{
+							QuantityToMove:Set[${Math.Calc[${Ship.OreHoldFreeSpace} / ${CargoIterator.Value.Volume}]}]
+						}
+						else
+						{
+							QuantityToMove:Set[${CargoIterator.Value.Quantity}]
+						}
+
+						Logger:Log["TransferCargoFromShipCorporateHangarToOreHold: Loading Cargo: ${QuantityToMove} units (${Math.Calc[${QuantityToMove} * ${CargoIterator.Value.Volume}]}m3) of ${CargoIterator.Value.Name}"]
+						Logger:Log["TransferCargoFromShipCorporateHangarToOreHold: Loading Cargo: DEBUG: TypeID = ${CargoIterator.Value.TypeID}, GroupID = ${CargoIterator.Value.GroupID}"]
+						if ${QuantityToMove} > 0
+						{
+							CargoIterator.Value:MoveTo[${MyShip.ID}, OreHold, ${QuantityToMove}]
+							wait 15
+						}
+
+						if ${Ship.OreHoldFreeSpace} < ${Ship.OreHoldMinimumFreeSpace}
+						{
+							Logger:Log["DEBUG: TransferCargoFromShipCorporateHangarToOreHold: Ore Hold: ${Ship.OreHoldFreeSpace} < ${Ship.OreHoldMinimumFreeSpace}"]
+							break
+						}
+					}
+				}
+				while ${CargoIterator:Next(exists)}
+		}
+		else
+		{
+			Logger:Log["DEBUG: obj_Cargo:TransferCargoFromShipCorporateHangarToOreHold: Nothing found to move"]
 		}
 	}
 
@@ -512,7 +492,7 @@ objectdef obj_Cargo
 		}
 	}
 
-	function TransferOreFromShipFleetHangarToCargoHold()
+	function TransferCargoFromShipCorporateHangarToCargoHold()
 	{
 		variable int QuantityToMove
 		variable iterator CargoIterator
@@ -524,30 +504,39 @@ objectdef obj_Cargo
 		}
 		Inventory.Current:GetItems[]
 		Inventory.Current.Items:GetIterator[CargoIterator]
-		Inventory.Current.Items:RemoveByQuery[${LavishScript.CreateQuery[CategorityID != CATEGORYID_ORE]}]
 
 		if ${CargoIterator:First(exists)}
 		{
 				do
 				{
-					QuantityToMove:Set[${CargoIterator.Value.Quantity}]
 					if (${CargoIterator.Value.Quantity} * ${CargoIterator.Value.Volume}) > ${Ship.CargoFreeSpace}
 					{
 						QuantityToMove:Set[${Math.Calc[${Ship.CargoFreeSpace} / ${CargoIterator.Value.Volume}]}]
 					}
+					else
+					{
+						QuantityToMove:Set[${CargoIterator.Value.Quantity}]
+					}
 
-					Logger:Log["TransferOreFromShipFleetHangarToCargoHold: Loading Cargo: ${QuantityToMove} units (${Math.Calc[${QuantityToMove} * ${CargoIterator.Value.Volume}]}m3) of ${CargoIterator.Value.Name}"]
+					Logger:Log["TransferCargoFromShipCorporateHangarToCargoHold: Loading Cargo: ${QuantityToMove} units (${Math.Calc[${QuantityToMove} * ${CargoIterator.Value.Volume}]}m3) of ${CargoIterator.Value.Name}"]
+					Logger:Log["TransferCargoFromShipCorporateHangarToCargoHold: Loading Cargo: DEBUG: TypeID = ${CargoIterator.Value.TypeID}, GroupID = ${CargoIterator.Value.GroupID}"]
 					if ${QuantityToMove} > 0
 					{
 						CargoIterator.Value:MoveTo[${MyShip.ID}, CargoHold, ${QuantityToMove}]
 						wait 15
+					}
+
+					if ${Ship.CargoFreeSpace} < ${Ship.CargoMinimumFreeSpace}
+					{
+						Logger:Log["DEBUG: TransferCargoFromShipCorporateHangarToCargoHold: Ship Cargo: ${Ship.CargoFreeSpace} < ${Ship.CargoMinimumFreeSpace}"]
+						break
 					}
 				}
 				while ${CargoIterator:Next(exists)}
 		}
 		else
 		{
-			Logger:Log["TransferOreFromShipFleetHangarToCargoHold: Nothing found to move", LOG_DEBUG]
+			Logger:Log["DEBUG: obj_Cargo:TransferCargoFromShipCorporateHangarToCargoHold: Nothing found to move"]
 		}
 	}
 
@@ -867,11 +856,17 @@ objectdef obj_Cargo
 						CargoIterator.Value:MoveTo[MyShip, CargoHold, ${QuantityToMove}]
 						wait 15
 					}
+
+					if ${Ship.CargoFreeSpace} < ${Ship.CargoMinimumFreeSpace}
+					{
+						Logger:Log["DEBUG: TransferListToShip: Ship Cargo: ${Ship.CargoFreeSpace} < ${Ship.CargoMinimumFreeSpace}"]
+						break
+					}
 				}
 				while ${CargoIterator:Next(exists)}
 			}
-			; Wait a bit to let the eve client move the cargo
-			wait 20
+				; Wait a bit to let the eve client move the cargo
+				wait 20
 		}
 	}
 
