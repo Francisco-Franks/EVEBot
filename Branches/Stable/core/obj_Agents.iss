@@ -335,7 +335,7 @@ objectdef obj_Agents
 						variable bool avoidLowSec
 						isLowSec:Set[${Missions.MissionCache.LowSec[${amIterator.Value.AgentID}]}]
 						avoidLowSec:Set[${Config.Missioneer.AvoidLowSec}]
-						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE) && !${IsStoryline}
+						if ${avoidLowSec} == FALSE && !${IsStoryline} || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE) && !${IsStoryline}
 						{
 							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE 
 							{
@@ -508,7 +508,7 @@ objectdef obj_Agents
 						variable bool avoidLowSec
 						isLowSec:Set[${Missions.MissionCache.LowSec[${amIterator.Value.AgentID}]}]
 						avoidLowSec:Set[${Config.Missioneer.AvoidLowSec}]
-						if ${avoidLowSec} == FALSE || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE) && !${IsStoryline}
+						if ${avoidLowSec} == FALSE && !${IsStoryline} || (${avoidLowSec} == TRUE && ${isLowSec} == FALSE) && !${IsStoryline}
 						{
 							if ${amIterator.Value.Type.Find[Courier](exists)} && ${Config.Missioneer.RunCourierMissions} == TRUE
 							{
